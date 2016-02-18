@@ -37,5 +37,13 @@ class uint8_less_one( object ):
 #
 
 if __name__=='__main__':
-	a = dm.DeFixedInt(8, 2, 2.5)
-	print a
+	a = dm.DeFixedInt(8, 2, 0.2)
+	b = dm.DeFixedInt(8, 2, 0.5)
+	#print dm.DeFixedInt(8, 2, a + b)
+	#print float( b )
+	b.showRange()
+	(a + b).showRange()
+	print hex( dm.DeFixedInt(8, 2, 0)-(a+b) )
+	print hex(b)
+	print b << 1
+	print b.fValue
