@@ -6,9 +6,11 @@ sys.path.append('external/deModel-0.2/')
 
 # http://docs.scipy.org/doc/numpy-1.10.1/user/basics.types.html
 import numpy as np
+import binascii
 
 # http://www.dilloneng.com/demodel.html
 import deModel as dm
+from deModel import DeFixedInt as fxd_int
 
 #
 #
@@ -37,13 +39,23 @@ class uint8_less_one( object ):
 #
 
 if __name__=='__main__':
-	a = dm.DeFixedInt(8, 2, 0.2)
-	b = dm.DeFixedInt(8, 2, 0.5)
-	#print dm.DeFixedInt(8, 2, a + b)
+	a = fxd_int(8, 2, 0.2)
+	b = fxd_int(8, 2, 0.5)
+	#print fxd_int(8, 2, a + b)
 	#print float( b )
 	b.showRange()
 	(a + b).showRange()
-	print hex( dm.DeFixedInt(8, 2, 0)-(a+b) )
+	print hex( fxd_int(8, 2, 0)-(a+b) )
 	print hex(b)
 	print b << 1
 	print b.fValue
+
+	### CORDIC
+	#a = str( int( hex(fxd_int( 1, 8, 1.0 )), 16 ) )
+	a = fxd_int( 0, 12, 0.5 )
+	print a
+	a.showRange()
+	print a.width  # A(a, b) - size = a+b+1 for signed
+	a = hex( a )
+	#print binascii.unhexlify(a)
+	#print a
