@@ -1,8 +1,5 @@
 # coding: utf-8
 
-from matplotlib.pyplot import plot, show, title, xlabel, ylabel
-from matplotlib.pyplot import grid
-
 from numpy.random import randn
 
 from numpy.fft import fft
