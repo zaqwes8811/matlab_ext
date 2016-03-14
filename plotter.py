@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from matplotlib.pyplot import plot, show, title, xlabel, ylabel
-from matplotlib.pyplot import grid
+from matplotlib.pyplot import grid, figure
 
 import matplotlib.pyplot as plt
 from matplotlib.pyplot import show, plot, grid
