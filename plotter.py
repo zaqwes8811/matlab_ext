@@ -11,7 +11,7 @@ import numpy as np
 #import cv2
 
 def plot_dot( fs, zs, **args ):
-    plot( fs, zs, 'o', fillstyle='none', **args)
+    plot( fs, zs, 'bo', fillstyle='none', **args)
 
 def close_all():
     plt.close('all')
