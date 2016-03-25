@@ -74,7 +74,7 @@ def median( x ):
 
 def mad(x, center, constant=1.4826):
     x = abs(x-center)
-    x.sort()
+#    x.sort()
     return np.median( x ) * constant
     
 
