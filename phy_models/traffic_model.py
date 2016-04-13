@@ -1,17 +1,18 @@
 # encoding: utf-8
 
-import sys
+# fixme: outliners - Kalman must be robust
 
 import numpy as np
+from numpy.random import randn  # too weak
+
 from matlab_ext.plotter import *
-from numpy.random import randn
 
 class Car(object):
     def __init__(self, x, y):
         self.x = x
         self.y = y
         self.vx = 0.
-        self.vy = 0.
+        self.vy = 10.1
         self.ax = 0.
         self.ay = 0.
 
@@ -28,15 +29,21 @@ class Mover(object):
         self.iter += 1
         
     def move(self, dt=1.):
+        def rnd():
+            std = 1.5
+            return randn() * std
+            
         self.think()
         
-        # change state
+        # X
         self.car.x += self.car.vx * dt + self.car.ax * dt**2 / 2.
         self.car.vx += self.car.ax * dt
         
-        std = 3.5
+        # Y
+        self.car.y += self.car.vy * dt + self.car.ay * dt**2 / 2.
+        self.car.vy += self.car.ay * dt
         
-        return self.car.x + randn() * std, self.car.y
+        return self.car.x + rnd(), self.car.y+rnd()
 
 # coord sys as in image
 #
@@ -62,17 +69,21 @@ if __name__=='__main__':
     ts = np.zeros( N )
     t = 0
     for i in range( N ):
-        xs[i], a = mover.move( dt )
+        xs[i], ys[i] = mover.move( dt )
         t += dt
         ts[i] = t
         
     figure()
-    plot( xs, ys, 'o' )
+    plot( xs, ys, '-o' )
+    xlabel('x, m')
+    ylabel('y, m')
     grid()
     show()
     
     figure()
-    plot( ts, xs, 'o' )
+    plot( ts, xs, '-o' )
+    xlabel('t, s')
+    ylabel('x, m')
     grid()
     show()
 
