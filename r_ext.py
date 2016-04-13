@@ -51,6 +51,32 @@ def read_csv_spec( fn, sep=',' ):
             tmp.append( map( lambda x: float(x), a) )
 
     return np.array( tmp )
+    
+    
+def trim_std(data, percentile):
+    data = np.array(data)
+    data.sort()
+    percentile = percentile / 2.
+    low = int(percentile * len(data))
+    high = int((1. - percentile) * len(data))
+    a = data[low:high]    
+    
+    # fixme: баг в C++ коде
+    if a.shape[0]:
+        return a.std(ddof=0)
+    else:
+        return np.inf
+        
+        
+def median( x ):
+    return np.median( x )
+    
+
+def mad(x, center, constant=1.4826):
+    x = abs(x-center)
+#    x.sort()
+    return np.median( x ) * constant
+    
 
 if __name__=='__main__':
 	data = read_csv_spec( '/home/zaqwes/to_r.csv' )
