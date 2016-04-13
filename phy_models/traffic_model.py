@@ -25,7 +25,8 @@ class Mover(object):
         
     def think(self):
         if self.iter == 20:
-            self.car.ax = 10.5       
+            self.car.ax = 10.5
+            self.car.ay = -10.0
         self.iter += 1
         
     def move(self, dt=1.):
@@ -35,6 +36,7 @@ class Mover(object):
             
         self.think()
         
+        # fixme: сделать через матрицы
         # X
         self.car.x += self.car.vx * dt + self.car.ax * dt**2 / 2.
         self.car.vx += self.car.ax * dt
@@ -77,13 +79,6 @@ if __name__=='__main__':
     plot( xs, ys, '-o' )
     xlabel('x, m')
     ylabel('y, m')
-    grid()
-    show()
-    
-    figure()
-    plot( ts, xs, '-o' )
-    xlabel('t, s')
-    ylabel('x, m')
     grid()
     show()
 
