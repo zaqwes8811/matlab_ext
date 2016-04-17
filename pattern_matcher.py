@@ -14,7 +14,9 @@ if __name__ == '__main__':
     print re.findall("^a*b*a", 'aaaaaa')
     print re.findall("^a*b*a", 'aaaaaa')
     
-    p = re.compile(r"^a*b{2,4}a", re.DEBUG)
+    # сверхжадные не заработали сходу
+    # http://easy-code.ru/lesson/java-quantifiers-regular-expressions
+    p = re.compile(r"^a{1,10}?b{2,4}?a", re.DEBUG)
     print p.findall('aaabbaaabbba')
     
     # DFA, NFA, e-NFA - engines
