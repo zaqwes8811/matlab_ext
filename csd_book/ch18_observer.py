@@ -7,4 +7,5 @@ Created on Thu Apr 21 22:48:19 2016
 
 
 if __name__ == '__main__':
-    pass
+    Kt = 1.    
+    Jt = 1000.  # [?]
