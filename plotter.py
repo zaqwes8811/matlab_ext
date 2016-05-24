@@ -60,6 +60,8 @@ def ocv2_plot():
     #    cv2.destroyAllWindows()
     pass
 
+def cls():
+    print "%c[2J" % (27)
 
 if __name__=='__main__':
     # Simple data to display in various forms
