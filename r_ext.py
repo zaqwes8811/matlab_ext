@@ -30,23 +30,29 @@ def write_csv_spec( fn, arr, titles=None ):
                    fmt='%10.5f',  delimiter=',') 
 
 
-def read_csv_spec( fn, sep=',' ):
+def read_csv_spec( fn, sep=',', from_array=False ):
     """ 
     		Args: "f:a:10,b:90, 18.9:67"
     
     		Returns: [[10, 90, 18.9, 67]]
     """
+    
     lines = []
-    with open( fn ) as f:
-        lines = f.read().splitlines()
+    if not from_array:   
+        with open( fn ) as f:
+            lines = f.read().splitlines()
+    else:
+        lines = fn
+            
     tmp = []
     for k in lines:
         s = k.replace(' ', sep).replace('\t', sep).replace(sep+sep,sep).replace(sep+sep,sep)
         s = s.replace('=', ':')        
-        a = s.split(',')
+        s = s.replace(';', ',') 
+        s = s.replace('_', ',')
+        a = s.split(',')       
         a = flatmap( a, lambda x: x.split(':'))
         a = filter( lambda x: try_parse( x ) != None, a )
-        
         if a:
             tmp.append( map( lambda x: float(x), a) )
 
