@@ -17,39 +17,61 @@
       3. This notice may not be removed or altered from any source distribution.
 */
 
-#ifndef PRECOMPILED_H
-#define PRECOMPILED_H
+#ifndef CLOCK_H
+#define CLOCK_H
 
-//If the compiler defines one of these items we can assume that it is windows running
-#if defined(__WIN32__) || defined(_WIN32) || defined(WIN32) || defined(__WINDOWS__) || defined(__TOS_WIN__)
-    //so we will standardize on WIN32 for windows specific code
-    #ifndef WIN32
-    #define WIN32
-    #endif
+#ifndef WIN32
+#include <boost/chrono.hpp>
+
+typedef boost::chrono::high_resolution_clock hr_clock;
+typedef boost::chrono::nanoseconds clock_freq;
+#endif
+
+class Clock
+{
+public:
+  Clock( );
+  ~Clock( );
+
+  // Records current time in start variable
+  void Start( void );
+
+  // Records current time in stop variable
+  void Stop( void );
+
+  // Time since last Start call
+#ifdef WIN32
+  f32 Elapsed( void );
+#else
+  long long Elapsed( void );
+#endif
+
+  // Time between last Start and Stop calls
+#ifdef WIN32
+  f32 Difference( void );
+#else
+  long long Difference( void );
+#endif
+
+  // Get the current clock count
+#ifdef WIN32
+  LONGLONG Current( void );
+#else
+  long long Current( void );
 #endif
 
 #ifdef WIN32
-#include <Windows.h>
+private:
+  LARGE_INTEGER m_freq;
+  LARGE_INTEGER m_start, m_stop, m_current;
+
+  void Query( LARGE_INTEGER& query );
+#else
+private:
+  hr_clock::time_point m_start;
+  hr_clock::time_point m_stop;
+  hr_clock::time_point m_current;
 #endif
+};
 
-#undef min
-#undef max
-
-#include <cstring> // strlen, memcpy, etc.
-#include <cstdlib> // exit
-#include <cfloat>  // FLT_MAX
-#include <vector>
-
-//#include "glut.h"
-#include <GL/glut.h>
-
-#include "IEMath.h"
-#include "Clock.h"
-#include "Render.h"
-#include "Body.h"
-#include "Shape.h"
-#include "Collision.h"
-#include "Manifold.h"
-#include "Scene.h"
-
-#endif // PRECOMPILED_H
+#endif // CLOCK_H

@@ -20,6 +20,8 @@
 
 #include "Precompiled.h"
 
+using namespace boost;
+
 Clock::Clock( )
 {
 #ifdef WIN32
@@ -71,7 +73,7 @@ void Clock::Stop( void )
   return (m_current.QuadPart - m_start.QuadPart) / (float)m_freq.QuadPart;
 #else
   m_current = hr_clock::now();
-  return std::chrono::duration_cast<clock_freq>(m_current - m_start).count();
+  return chrono::duration_cast<clock_freq>(m_current - m_start).count();
 #endif
 }
 
@@ -85,7 +87,7 @@ void Clock::Stop( void )
 #ifdef WIN32
   return (m_stop.QuadPart - m_start.QuadPart) / (float)m_freq.QuadPart;
 #else
-  return std::chrono::duration_cast<clock_freq>(m_stop - m_start).count();
+  return chrono::duration_cast<clock_freq>(m_stop - m_start).count();
 #endif
 }
 
@@ -101,6 +103,6 @@ void Clock::Stop( void )
   return m_current.QuadPart;
 #else
   m_current = hr_clock::now();
-  return std::chrono::duration_cast<clock_freq>(m_current.time_since_epoch()).count();
+  return chrono::duration_cast<clock_freq>(m_current.time_since_epoch()).count();
 #endif
 }

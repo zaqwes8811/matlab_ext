@@ -1,4 +1,4 @@
-CXXFLAGS=-O3 -std=c++11 -Wall -g
+CXXFLAGS=-O3 -Wall -g
 
 SOURCES= $(wildcard *.cpp)
 
@@ -6,7 +6,7 @@ OBJECTS=$(patsubst %.cpp, %.o, $(SOURCES))
 
 TARGET=$(lastword $(subst /, ,$(realpath .)))
 
-LINKS= -lglut -lGL -lGLU
+LINKS= -lglut -lGL -lGLU -lboost_system -lboost_chrono
 
 CXX=g++
 

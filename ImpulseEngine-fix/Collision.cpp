@@ -35,10 +35,10 @@ void CircletoCircle( Manifold *m, Body *a, Body *b )
   Circle *B = reinterpret_cast<Circle *>(b->shape);
 
   // Calculate translational vector, which is normal
-  Vec2 normal = b->position - a->position;
+  vec2 normal = b->position - a->position;
 
-  real dist_sqr = normal.LenSqr( );
-  real radius = A->radius + B->radius;
+  float dist_sqr = normal.LenSqr( );
+  float radius = A->radius + B->radius;
 
   // Not in contact
   if(dist_sqr >= radius * radius)
@@ -47,14 +47,14 @@ void CircletoCircle( Manifold *m, Body *a, Body *b )
     return;
   }
 
-  real distance = std::sqrt( dist_sqr );
+  float distance = std::sqrt( dist_sqr );
 
   m->contact_count = 1;
 
   if(distance == 0.0f)
   {
     m->penetration = A->radius;
-    m->normal = Vec2( 1, 0 );
+    m->normal = vec2( 1, 0 );
     m->contacts [0] = a->position;
   }
   else
@@ -73,16 +73,16 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   m->contact_count = 0;
 
   // Transform circle center to Polygon model space
-  Vec2 center = a->position;
+  vec2 center = a->position;
   center = B->u.Transpose( ) * (center - b->position);
 
   // Find edge with minimum penetration
   // Exact concept as using support points in Polygon vs Polygon
-  real separation = -FLT_MAX;
+  float separation = -FLT_MAX;
   uint32 faceNormal = 0;
   for(uint32 i = 0; i < B->m_vertexCount; ++i)
   {
-    real s = Dot( B->m_normals[i], center - B->m_vertices[i] );
+    float s = Dot( B->m_normals[i], center - B->m_vertices[i] );
 
     if(s > A->radius)
       return;
@@ -95,9 +95,9 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   }
 
   // Grab face's vertices
-  Vec2 v1 = B->m_vertices[faceNormal];
+  vec2 v1 = B->m_vertices[faceNormal];
   uint32 i2 = faceNormal + 1 < B->m_vertexCount ? faceNormal + 1 : 0;
-  Vec2 v2 = B->m_vertices[i2];
+  vec2 v2 = B->m_vertices[i2];
 
   // Check to see if center is within polygon
   if(separation < EPSILON)
@@ -110,8 +110,8 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   }
 
   // Determine which voronoi region of the edge center of circle lies within
-  real dot1 = Dot( center - v1, v2 - v1 );
-  real dot2 = Dot( center - v2, v1 - v2 );
+  float dot1 = Dot( center - v1, v2 - v1 );
+  float dot2 = Dot( center - v2, v1 - v2 );
   m->penetration = A->radius - separation;
 
   // Closest to v1
@@ -121,7 +121,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
       return;
 
     m->contact_count = 1;
-    Vec2 n = v1 - center;
+    vec2 n = v1 - center;
     n = B->u * n;
     n.Normalize( );
     m->normal = n;
@@ -136,7 +136,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
       return;
 
     m->contact_count = 1;
-    Vec2 n = v2 - center;
+    vec2 n = v2 - center;
     v2 = B->u * v2 + b->position;
     m->contacts[0] = v2;
     n = B->u * n;
@@ -147,7 +147,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   // Closest to face
   else
   {
-    Vec2 n = B->m_normals[faceNormal];
+    vec2 n = B->m_normals[faceNormal];
     if(Dot( center - v1, n ) > A->radius)
       return;
 
@@ -164,33 +164,33 @@ void PolygontoCircle( Manifold *m, Body *a, Body *b )
   m->normal = -m->normal;
 }
 
-real FindAxisLeastPenetration( uint32 *faceIndex, PolygonShape *A, PolygonShape *B )
+float FindAxisLeastPenetration( uint32 *faceIndex, PolygonShape *A, PolygonShape *B )
 {
-  real bestDistance = -FLT_MAX;
+  float bestDistance = -FLT_MAX;
   uint32 bestIndex;
 
   for(uint32 i = 0; i < A->m_vertexCount; ++i)
   {
     // Retrieve a face normal from A
-    Vec2 n = A->m_normals[i];
-    Vec2 nw = A->u * n;
+    vec2 n = A->m_normals[i];
+    vec2 nw = A->u * n;
 
     // Transform face normal into B's model space
     Mat2 buT = B->u.Transpose( );
     n = buT * nw;
 
     // Retrieve support point from B along -n
-    Vec2 s = B->GetSupport( -n );
+    vec2 s = B->GetSupport( -n );
 
     // Retrieve vertex on face from A, transform into
     // B's model space
-    Vec2 v = A->m_vertices[i];
+    vec2 v = A->m_vertices[i];
     v = A->u * v + A->body->position;
     v -= B->body->position;
     v = buT * v;
 
     // Compute penetration distance (in B's model space)
-    real d = Dot( n, s - v );
+    float d = Dot( n, s - v );
 
     // Store greatest distance
     if(d > bestDistance)
@@ -204,9 +204,9 @@ real FindAxisLeastPenetration( uint32 *faceIndex, PolygonShape *A, PolygonShape 
   return bestDistance;
 }
 
-void FindIncidentFace( Vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, uint32 referenceIndex )
+void FindIncidentFace( vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, uint32 referenceIndex )
 {
-  Vec2 referenceNormal = RefPoly->m_normals[referenceIndex];
+  vec2 referenceNormal = RefPoly->m_normals[referenceIndex];
 
   // Calculate normal in incident's frame of reference
   referenceNormal = RefPoly->u * referenceNormal; // To world space
@@ -214,10 +214,10 @@ void FindIncidentFace( Vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, ui
 
   // Find most anti-normal face on incident polygon
   int32 incidentFace = 0;
-  real minDot = FLT_MAX;
+  float minDot = FLT_MAX;
   for(uint32 i = 0; i < IncPoly->m_vertexCount; ++i)
   {
-    real dot = Dot( referenceNormal, IncPoly->m_normals[i] );
+    float dot = Dot( referenceNormal, IncPoly->m_normals[i] );
     if(dot < minDot)
     {
       minDot = dot;
@@ -231,18 +231,18 @@ void FindIncidentFace( Vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, ui
   v[1] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
 }
 
-int32 Clip( Vec2 n, real c, Vec2 *face )
+int32 Clip( vec2 n, float c, vec2 *face )
 {
   uint32 sp = 0;
-  Vec2 out[2] = {
+  vec2 out[2] = {
     face[0],
     face[1]
   };
 
   // Retrieve distances from each endpoint to the line
   // d = ax + by - c
-  real d1 = Dot( n, face[0] ) - c;
-  real d2 = Dot( n, face[1] ) - c;
+  float d1 = Dot( n, face[0] ) - c;
+  float d2 = Dot( n, face[1] ) - c;
 
   // If negative (behind plane) clip
   if(d1 <= 0.0f) out[sp++] = face[0];
@@ -252,7 +252,7 @@ int32 Clip( Vec2 n, real c, Vec2 *face )
   if(d1 * d2 < 0.0f) // less than to ignore -0.0f
   {
     // Push interesection point
-    real alpha = d1 / (d1 - d2);
+    float alpha = d1 / (d1 - d2);
     out[sp] = face[0] + alpha * (face[1] - face[0]);
     ++sp;
   }
@@ -274,13 +274,13 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
 
   // Check for a separating axis with A's face planes
   uint32 faceA;
-  real penetrationA = FindAxisLeastPenetration( &faceA, A, B );
+  float penetrationA = FindAxisLeastPenetration( &faceA, A, B );
   if(penetrationA >= 0.0f)
     return;
 
   // Check for a separating axis with B's face planes
   uint32 faceB;
-  real penetrationB = FindAxisLeastPenetration( &faceB, B, A );
+  float penetrationB = FindAxisLeastPenetration( &faceB, B, A );
   if(penetrationB >= 0.0f)
     return;
 
@@ -308,7 +308,7 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
   }
 
   // World space incident face
-  Vec2 incidentFace[2];
+  vec2 incidentFace[2];
   FindIncidentFace( incidentFace, RefPoly, IncPoly, referenceIndex );
 
   //        y
@@ -325,26 +325,26 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
   //  n : incident normal
 
   // Setup reference face vertices
-  Vec2 v1 = RefPoly->m_vertices[referenceIndex];
+  vec2 v1 = RefPoly->m_vertices[referenceIndex];
   referenceIndex = referenceIndex + 1 == RefPoly->m_vertexCount ? 0 : referenceIndex + 1;
-  Vec2 v2 = RefPoly->m_vertices[referenceIndex];
+  vec2 v2 = RefPoly->m_vertices[referenceIndex];
 
   // Transform vertices to world space
   v1 = RefPoly->u * v1 + RefPoly->body->position;
   v2 = RefPoly->u * v2 + RefPoly->body->position;
 
   // Calculate reference face side normal in world space
-  Vec2 sidePlaneNormal = (v2 - v1);
+  vec2 sidePlaneNormal = (v2 - v1);
   sidePlaneNormal.Normalize( );
 
   // Orthogonalize
-  Vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
+  vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
 
   // ax + by = c
   // c is distance from origin
-  real refC = Dot( refFaceNormal, v1 );
-  real negSide = -Dot( sidePlaneNormal, v1 );
-  real posSide =  Dot( sidePlaneNormal, v2 );
+  float refC = Dot( refFaceNormal, v1 );
+  float negSide = -Dot( sidePlaneNormal, v1 );
+  float posSide =  Dot( sidePlaneNormal, v2 );
 
   // Clip incident face to reference face side planes
   if(Clip( -sidePlaneNormal, negSide, incidentFace ) < 2)
@@ -358,7 +358,7 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
 
   // Keep points behind reference face
   uint32 cp = 0; // clipped points behind reference face
-  real separation = Dot( refFaceNormal, incidentFace[0] ) - refC;
+  float separation = Dot( refFaceNormal, incidentFace[0] ) - refC;
   if(separation <= 0.0f)
   {
     m->contacts[cp] = incidentFace[0];
@@ -377,7 +377,7 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
     ++cp;
 
     // Average penetration
-    m->penetration /= (real)cp;
+    m->penetration /= (float)cp;
   }
 
   m->contact_count = cp;
