@@ -18,50 +18,44 @@
  */
 
 #include "Precompiled.h"
+#include "TrafficModelHelper.h"
+#include "TrafficModel.h"
+#include "ImageZoneDescription.h"
+
+#include <iostream>
+#include <mathfu/utilities.h>
+#include <mathfu/matrix.h>
+#include <mathfu/vector.h>
+#include <mathfu/glsl_mappings.h>
 
 #include <memory>
 #include <string>
 #include <sstream>
 #include <iostream>
 
+// https://google.github.io/mathfu/mathfu_guide_matrices.html#mathfu_guide_matrices_declaration
+
 #define ESC_KEY 27
 
-using namespace boost;
 using namespace std;
+using namespace mathfu;
 
-//glm::vec
+static mat2 g_p_mat;
+Clock g_clock;
+bool g_frameStepping = false;
+bool g_canStep = false;
+vec2 g_screen;
+vec2 g_world;
 
-struct Mark
-{
-	Mark( vec2 pos )
-	{
-		this->pos = pos;
-	}
-
-	void draw();
-
-	vec2 pos;
-};
-
-void Mark::draw()
-{
-	int size = 2;
-
-	glColor3f(1, 1, 0);
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(pos.x, pos.y - size);
-	glVertex2f(pos.x, pos.y + size);
-	glEnd();
-
-	glBegin(GL_LINE_LOOP);
-	glVertex2f(pos.x - size, pos.y);
-	glVertex2f(pos.x + size, pos.y);
-	glEnd();
-}
+static int fps = 22;
+static TrafficModel* model = new TrafficModelEasyYDim(fps,
+        Restrictions::dflt_count_x_gridpoints,
+        Restrictions::dflt_count_y_gridpoints, 0xa123);
+static BaseScene* g_scene = new SceneNoGravity(1.0f / 60.0f, 10);
 
 //========================================================
 
-void RenderString( int32 x, int32 y, const char *s )
+void __render_string( int32 x, int32 y, const char *s )
 {
 	glColor3f(0.5f, 0.5f, 0.9f);
 	glRasterPos2i(x, y);
@@ -70,126 +64,58 @@ void RenderString( int32 x, int32 y, const char *s )
 		glutBitmapCharacter( GLUT_BITMAP_9_BY_15, *(s + i));
 }
 
-void RenderString( int32 x, int32 y, string s )
+void render_string( int32 x, int32 y, string s )
 {
-	cout << s << endl;
-	RenderString(x, y, s.c_str());
+	__render_string(x, y, s.c_str());
 }
 
-//=========================================================
-
-class SceneNoGravity: public BaseScene
+void passive_mouse_func( int x, int y )
 {
-public:
-	SceneNoGravity( f32 dt, uint32 iterations ) :
-			BaseScene(dt, iterations)
-	{
-	}
-	virtual void Step( void )
-	{
-	}
-};
+	vec2 point(x, y);
+	g_screen = g_p_mat * point;
 
-static BaseScene* g_scene = new SceneNoGravity(1.0f / 60.0f, 10);
-Clock g_Clock;
-bool g_frameStepping = false;
-bool g_canStep = false;
+	// world
+	g_world = g_screen;
+	mat2 mirror_y(1, 0, 0, -1);
+	vec2 v(mirror_y * g_world);
 
-static vector<string> messages_;
+	mat2 rotate_90(0, -1, 1, 0);
+	vec2 v1(rotate_90 * v);
 
-void mouse_func( int button, int state, int x, int y )
+	vec2 move_vec(80, 30);
+
+	g_world = v1 + move_vec;
+}
+
+void click_mouse_func( int button, int state, int x, int y )
+{
+	passive_mouse_func(x, y);
+}
+
+void draw_cursor()
 {
 	stringstream ss;
-	ss << "(" << x << ", " << y << ")";
-	messages_.push_back(ss.str());
+	ss << g_world[0] << "," << g_world(1);
+	render_string(g_screen[0], g_screen[1], ss.str());
 
-	x /= 10.0f;
-	y /= 10.0f;
-
-	if( state == GLUT_DOWN )
-		switch (button) {
-		case GLUT_LEFT_BUTTON: {
-//			PolygonShape poly;  // !!!!!!!!!!!!!
-//			uint32 count = (uint32) Random(3, MaxPolyVertexCount);
-//			vec2 *vertices = new vec2[count];
-//			float e = Random(5, 10);
-//			for( uint32 i = 0; i < count; ++i )
-//				vertices[i].Set(Random(-e, e), Random(-e, e));
-//			poly.Set(vertices, count);
-//			Body *b = g_scene->Add(&poly, x, y);
-//			b->SetOrient(Random(-PI, PI));
-//			b->restitution = 0.2f;
-//			b->dynamicFriction = 0.2f;
-//			b->staticFriction = 0.4f;
-//			delete[] vertices;
-		}
-			break;
-		case GLUT_RIGHT_BUTTON: {
-//			Circle c(Random(1.0f, 3.0f));
-//			Body *b = g_scene->Add(&c, x, y);
-		}
-			break;
-		}
-}
-
-void keyboard_func( unsigned char key, int x, int y )
-{
-	switch (key) {
-	case ESC_KEY:
-		exit(0);
-		break;
-	case 's': {
-		//Circle c( 25.0f );
-		//scene.Add( &c, 400 + (rand( ) % 250) * ((rand( ) % 2 == 1) ? 1 : -1), 50 );
-		//OBB obb;
-		//real e = Random( 10.0f, 35.0f );
-		//obb.extents.Set( e, e );
-		//Body *b = scene.Add( &obb, 400 + (rand( ) % 250) * ((rand( ) % 2 == 1) ? 1 : -1), 50 );
-		//b->SetOrient( PI / 4.0f );
-		//b->restitution = 0.2f;
-		//b->dynamicFriction = 0.2f;
-		//b->staticFriction = 0.4f;
-	}
-		break;
-	case 'd': {
-		//Circle c( 25.0f );
-		//scene.Add( &c, 420, 50 );
-	}
-		break;
-	case 'f':
-		g_frameStepping = g_frameStepping ? false : true;
-		break;
-	case ' ':
-		g_canStep = true;
-		break;
-	}
+	Mark m(vec2_ie(30, 80));
+	m.draw();
 }
 
 void phy_loop_func( void )
 {
 	glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	RenderString(1, 2, "Left click to spawn a polygon");
-	RenderString(1, 4, "Right click to spawn a circle");
+	// My event
+	draw_cursor();
 
-	for( int i = 0; i < messages_.size(); ++i ){
-		RenderString(20, 20, messages_[i]);
-	}
-	messages_.clear();
-
+	// Source event
 	static double s_accumulator = 0;
-
 	// Different time mechanisms for Linux and Windows
-#ifdef WIN32
-	s_accumulator += g_Clock.Elapsed( );
-#else
-	s_accumulator += g_Clock.Elapsed()
-	        / static_cast<double>(chrono::duration_cast<clock_freq>(
-	                chrono::seconds(1)).count());
-#endif
-
-	g_Clock.Start();
-
+	s_accumulator += g_clock.Elapsed()
+	        / static_cast<double>(boost::chrono::duration_cast<clock_freq>(
+	                boost::chrono::seconds(1)).count());
+	g_clock.Start();
 	s_accumulator = clamp(0.0f, 0.1f, s_accumulator);
 	while( s_accumulator >= dt ){
 		if( !g_frameStepping )
@@ -202,14 +128,8 @@ void phy_loop_func( void )
 		}
 		s_accumulator -= dt;
 	}
-
-	g_Clock.Stop();
-
+	g_clock.Stop();
 	g_scene->Render();
-
-	// my code
-	Mark m(vec2(10, 10));
-	m.draw();
 
 	glutSwapBuffers();
 }
@@ -218,27 +138,31 @@ void phy_loop_func( void )
 
 int main( int argc, char** argv )
 {
-	// fixme: где переход к единицам измерения СИ
+	float max_img_x_px = 450;
+	float max_img_y_px = 800;
+	float max_img_x_m = 60;
+	float max_img_y_m = 107;
+
+	g_p_mat = mat2(max_img_x_m / max_img_x_px, 0.0f, 0.0f,
+	        max_img_y_m / max_img_y_px);
 
 	glutInit(&argc, argv);
 	glutInitDisplayMode( GLUT_RGBA | GLUT_DOUBLE);
-	glutInitWindowSize(800, 600);
-	glutCreateWindow("PhyEngine");
+	glutInitWindowSize(450, 800);
+	glutCreateWindow("RadarView");
 	glutDisplayFunc(phy_loop_func);
-	glutKeyboardFunc(keyboard_func);
-	glutMouseFunc(mouse_func);
+	glutMouseFunc(click_mouse_func);
 	glutIdleFunc(phy_loop_func);
-
+	glutPassiveMotionFunc(passive_mouse_func);
 	glMatrixMode( GL_PROJECTION);
 	glPushMatrix();
 	glLoadIdentity();
-	gluOrtho2D(0, 80, 60, 0);
+	gluOrtho2D(0, max_img_x_m, max_img_y_m, 0);
 	glMatrixMode( GL_MODELVIEW);
 	glPushMatrix();
 	glLoadIdentity();
 
 	srand(1);
 	glutMainLoop();
-
 	return 0;
 }

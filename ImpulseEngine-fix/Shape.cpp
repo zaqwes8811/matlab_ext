@@ -51,7 +51,7 @@ void PolygonShape::Draw( void ) const
 	glColor3f(body->r, body->g, body->b);
 	glBegin(GL_LINE_LOOP);
 	for( uint32 i = 0; i < m_vertexCount; ++i ){
-		vec2 v = body->position + u * m_vertices[i];
+		vec2_ie v = body->position + u * m_vertices[i];
 		glVertex2f(v.x, v.y);
 	}
 	glEnd();
@@ -60,16 +60,16 @@ void PolygonShape::Draw( void ) const
 void PolygonShape::ComputeMass( float density )
 {
 	// Calculate centroid and moment of interia
-	vec2 c(0.0f, 0.0f); // centroid
+	vec2_ie c(0.0f, 0.0f); // centroid
 	float area = 0.0f;
 	float I = 0.0f;
 	const float k_inv3 = 1.0f / 3.0f;
 
 	for( uint32 i1 = 0; i1 < m_vertexCount; ++i1 ){
 		// Triangle vertices, third vertex implied as (0, 0)
-		vec2 p1(m_vertices[i1]);
+		vec2_ie p1(m_vertices[i1]);
 		uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
-		vec2 p2(m_vertices[i2]);
+		vec2_ie p2(m_vertices[i2]);
 
 		float D = Cross(p1, p2);
 		float triangleArea = 0.5f * D;
@@ -111,7 +111,7 @@ void Circle::Draw( void ) const
 	float inc = PI * 2.0f / (float) k_segments;
 	for( uint32 i = 0; i < k_segments; ++i ){
 		theta += inc;
-		vec2 p(std::cos(theta), std::sin(theta));
+		vec2_ie p(std::cos(theta), std::sin(theta));
 		p *= radius;
 		p += body->position;
 		glVertex2f(p.x, p.y);
@@ -120,7 +120,7 @@ void Circle::Draw( void ) const
 
 	// Render line within circle so orientation is visible
 	glBegin(GL_LINE_STRIP);
-	vec2 r(0, 1.0f);
+	vec2_ie r(0, 1.0f);
 	float c = std::cos(body->orient);
 	float s = std::sin(body->orient);
 	r.Set(r.x * c - r.y * s, r.x * s + r.y * c);
