@@ -43,7 +43,7 @@ typedef double f64;
 const float PI = 3.141592741f;
 const float EPSILON = 0.0001f;
 
-struct vec2
+struct vec2_ie
 {
 	union
 	{
@@ -57,10 +57,10 @@ struct vec2
 		};
 	};
 
-	vec2()
+	vec2_ie()
 	{
 	}
-	vec2( float x_, float y_ ) :
+	vec2_ie( float x_, float y_ ) :
 			x(x_), y(y_)
 	{
 	}
@@ -71,19 +71,19 @@ struct vec2
 		y = y_;
 	}
 
-	vec2 operator-( void ) const
+	vec2_ie operator-( void ) const
 	{
-		return vec2(-x, -y);
+		return vec2_ie(-x, -y);
 	}
 
-	vec2 operator*( float s ) const
+	vec2_ie operator*( float s ) const
 	{
-		return vec2(x * s, y * s);
+		return vec2_ie(x * s, y * s);
 	}
 
-	vec2 operator/( float s ) const
+	vec2_ie operator/( float s ) const
 	{
-		return vec2(x / s, y / s);
+		return vec2_ie(x / s, y / s);
 	}
 
 	void operator*=( float s )
@@ -92,28 +92,28 @@ struct vec2
 		y *= s;
 	}
 
-	vec2 operator+( const vec2& rhs ) const
+	vec2_ie operator+( const vec2_ie& rhs ) const
 	{
-		return vec2(x + rhs.x, y + rhs.y);
+		return vec2_ie(x + rhs.x, y + rhs.y);
 	}
 
-	vec2 operator+( float s ) const
+	vec2_ie operator+( float s ) const
 	{
-		return vec2(x + s, y + s);
+		return vec2_ie(x + s, y + s);
 	}
 
-	void operator+=( const vec2& rhs )
+	void operator+=( const vec2_ie& rhs )
 	{
 		x += rhs.x;
 		y += rhs.y;
 	}
 
-	vec2 operator-( const vec2& rhs ) const
+	vec2_ie operator-( const vec2_ie& rhs ) const
 	{
-		return vec2(x - rhs.x, y - rhs.y);
+		return vec2_ie(x - rhs.x, y - rhs.y);
 	}
 
-	void operator-=( const vec2& rhs )
+	void operator-=( const vec2_ie& rhs )
 	{
 		x -= rhs.x;
 		y -= rhs.y;
@@ -153,9 +153,9 @@ struct vec2
 	}
 };
 
-inline vec2 operator*( float s, const vec2& v )
+inline vec2_ie operator*( float s, const vec2_ie& v )
 {
-	return vec2(s * v.x, s * v.y);
+	return vec2_ie(s * v.x, s * v.y);
 }
 
 struct Mat2
@@ -207,14 +207,14 @@ struct Mat2
 		return Mat2(std::abs(m00), std::abs(m01), std::abs(m10), std::abs(m11));
 	}
 
-	vec2 AxisX( void ) const
+	vec2_ie AxisX( void ) const
 	{
-		return vec2(m00, m10);
+		return vec2_ie(m00, m10);
 	}
 
-	vec2 AxisY( void ) const
+	vec2_ie AxisY( void ) const
 	{
-		return vec2(m01, m11);
+		return vec2_ie(m01, m11);
 	}
 
 	Mat2 Transpose( void ) const
@@ -222,9 +222,9 @@ struct Mat2
 		return Mat2(m00, m10, m01, m11);
 	}
 
-	const vec2 operator*( const vec2& rhs ) const
+	const vec2_ie operator*( const vec2_ie& rhs ) const
 	{
-		return vec2(m00 * rhs.x + m01 * rhs.y, m10 * rhs.x + m11 * rhs.y);
+		return vec2_ie(m00 * rhs.x + m01 * rhs.y, m10 * rhs.x + m11 * rhs.y);
 	}
 
 	const Mat2 operator*( const Mat2& rhs ) const
@@ -239,38 +239,38 @@ struct Mat2
 	}
 };
 
-inline vec2 Min( const vec2& a, const vec2& b )
+inline vec2_ie Min( const vec2_ie& a, const vec2_ie& b )
 {
-	return vec2(std::min(a.x, b.x), std::min(a.y, b.y));
+	return vec2_ie(std::min(a.x, b.x), std::min(a.y, b.y));
 }
 
-inline vec2 Max( const vec2& a, const vec2& b )
+inline vec2_ie Max( const vec2_ie& a, const vec2_ie& b )
 {
-	return vec2(std::max(a.x, b.x), std::max(a.y, b.y));
+	return vec2_ie(std::max(a.x, b.x), std::max(a.y, b.y));
 }
 
-inline float Dot( const vec2& a, const vec2& b )
+inline float Dot( const vec2_ie& a, const vec2_ie& b )
 {
 	return a.x * b.x + a.y * b.y;
 }
 
-inline float DistSqr( const vec2& a, const vec2& b )
+inline float DistSqr( const vec2_ie& a, const vec2_ie& b )
 {
-	vec2 c = a - b;
+	vec2_ie c = a - b;
 	return Dot(c, c);
 }
 
-inline vec2 Cross( const vec2& v, float a )
+inline vec2_ie Cross( const vec2_ie& v, float a )
 {
-	return vec2(a * v.y, -a * v.x);
+	return vec2_ie(a * v.y, -a * v.x);
 }
 
-inline vec2 Cross( float a, const vec2& v )
+inline vec2_ie Cross( float a, const vec2_ie& v )
 {
-	return vec2(-a * v.y, a * v.x);
+	return vec2_ie(-a * v.y, a * v.x);
 }
 
-inline float Cross( const vec2& a, const vec2& b )
+inline float Cross( const vec2_ie& a, const vec2_ie& b )
 {
 	return a.x * b.y - a.y * b.x;
 }
@@ -317,7 +317,7 @@ inline bool BiasGreaterThan( float a, float b )
 }
 
 const f32 gravityScale = 5.0f;
-const vec2 gravity(0, 10.0f * gravityScale);
+const vec2_ie gravity(0, 10.0f * gravityScale);
 const float dt = 1.0f / 60.0f;
 
 #endif // IEMATH_H

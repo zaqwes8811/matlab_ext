@@ -130,7 +130,7 @@ struct PolygonShape: public Shape
 		m_normals[3].Set(-1.0f, 0.0f);
 	}
 
-	void Set( vec2 *vertices, uint32 count )
+	void Set( vec2_ie *vertices, uint32 count )
 	{
 		// No hulls with less than 3 vertices (ensure actual polygon)
 		assert(count > 2 && count <= MaxPolyVertexCount);
@@ -175,8 +175,8 @@ struct PolygonShape: public Shape
 				// Record each counter clockwise third vertex and add
 				// to the output hull
 				// See : http://www.oocities.org/pcgpe/math2d.html
-				vec2 e1 = vertices[nextHullIndex] - vertices[hull[outCount]];
-				vec2 e2 = vertices[i] - vertices[hull[outCount]];
+				vec2_ie e1 = vertices[nextHullIndex] - vertices[hull[outCount]];
+				vec2_ie e2 = vertices[i] - vertices[hull[outCount]];
 				float c = Cross(e1, e2);
 				if( c < 0.0f )
 					nextHullIndex = i;
@@ -204,25 +204,25 @@ struct PolygonShape: public Shape
 		// Compute face normals
 		for( uint32 i1 = 0; i1 < m_vertexCount; ++i1 ){
 			uint32 i2 = i1 + 1 < m_vertexCount ? i1 + 1 : 0;
-			vec2 face = m_vertices[i2] - m_vertices[i1];
+			vec2_ie face = m_vertices[i2] - m_vertices[i1];
 
 			// Ensure no zero-length edges, because that's bad
 			assert(face.LenSqr() > EPSILON * EPSILON);
 
 			// Calculate normal with 2D cross product between vector and scalar
-			m_normals[i1] = vec2(face.y, -face.x);
+			m_normals[i1] = vec2_ie(face.y, -face.x);
 			m_normals[i1].Normalize();
 		}
 	}
 
 	// The extreme point along a direction within a polygon
-	vec2 GetSupport( const vec2& dir )
+	vec2_ie GetSupport( const vec2_ie& dir )
 	{
 		float bestProjection = -FLT_MAX;
-		vec2 bestVertex;
+		vec2_ie bestVertex;
 
 		for( uint32 i = 0; i < m_vertexCount; ++i ){
-			vec2 v = m_vertices[i];
+			vec2_ie v = m_vertices[i];
 			float projection = Dot(v, dir);
 
 			if( projection > bestProjection ){
@@ -235,8 +235,8 @@ struct PolygonShape: public Shape
 	}
 
 	uint32 m_vertexCount;
-	vec2 m_vertices[MaxPolyVertexCount];
-	vec2 m_normals[MaxPolyVertexCount];
+	vec2_ie m_vertices[MaxPolyVertexCount];
+	vec2_ie m_normals[MaxPolyVertexCount];
 };
 
 //====================================================
@@ -246,12 +246,12 @@ struct Body
 {
 	Body( Shape *shape_, uint32 x, uint32 y );
 
-	void ApplyForce( const vec2& f )
+	void ApplyForce( const vec2_ie& f )
 	{
 		force += f;
 	}
 
-	void ApplyImpulse( const vec2& impulse, const vec2& contactVector )
+	void ApplyImpulse( const vec2_ie& impulse, const vec2_ie& contactVector )
 	{
 		velocity += im * impulse;
 		angularVelocity += iI * Cross(contactVector, impulse);
@@ -267,14 +267,14 @@ struct Body
 
 	void SetOrient( float radians );
 
-	vec2 position;
-	vec2 velocity;
+	vec2_ie position;
+	vec2_ie velocity;
 
 	float angularVelocity;
 	float torque;
 	float orient; // radians
 
-	vec2 force;
+	vec2_ie force;
 
 	// Set by shape
 	float I;  // moment of inertia
@@ -292,6 +292,36 @@ struct Body
 
 	// Store a color in RGB format
 	float r, g, b;
+};
+
+//========================================================
+
+//glm::vec
+
+struct Mark
+{
+	Mark( vec2_ie pos )
+	{
+		this->pos = pos;
+	}
+
+	void draw()
+	{
+		int size = 3;
+
+		glColor3f(1, 1, 0);
+		glBegin (GL_LINE_LOOP);
+		glVertex2f(pos.x, pos.y - size);
+		glVertex2f(pos.x, pos.y + size);
+		glEnd();
+
+		glBegin(GL_LINE_LOOP);
+		glVertex2f(pos.x - size, pos.y);
+		glVertex2f(pos.x + size, pos.y);
+		glEnd();
+	}
+
+	vec2_ie pos;
 };
 
 #endif // SHAPE_H

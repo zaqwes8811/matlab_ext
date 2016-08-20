@@ -35,7 +35,7 @@ void CircletoCircle( Manifold *m, Body *a, Body *b )
   Circle *B = reinterpret_cast<Circle *>(b->shape);
 
   // Calculate translational vector, which is normal
-  vec2 normal = b->position - a->position;
+  vec2_ie normal = b->position - a->position;
 
   float dist_sqr = normal.LenSqr( );
   float radius = A->radius + B->radius;
@@ -54,7 +54,7 @@ void CircletoCircle( Manifold *m, Body *a, Body *b )
   if(distance == 0.0f)
   {
     m->penetration = A->radius;
-    m->normal = vec2( 1, 0 );
+    m->normal = vec2_ie( 1, 0 );
     m->contacts [0] = a->position;
   }
   else
@@ -73,7 +73,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   m->contact_count = 0;
 
   // Transform circle center to Polygon model space
-  vec2 center = a->position;
+  vec2_ie center = a->position;
   center = B->u.Transpose( ) * (center - b->position);
 
   // Find edge with minimum penetration
@@ -95,9 +95,9 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   }
 
   // Grab face's vertices
-  vec2 v1 = B->m_vertices[faceNormal];
+  vec2_ie v1 = B->m_vertices[faceNormal];
   uint32 i2 = faceNormal + 1 < B->m_vertexCount ? faceNormal + 1 : 0;
-  vec2 v2 = B->m_vertices[i2];
+  vec2_ie v2 = B->m_vertices[i2];
 
   // Check to see if center is within polygon
   if(separation < EPSILON)
@@ -121,7 +121,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
       return;
 
     m->contact_count = 1;
-    vec2 n = v1 - center;
+    vec2_ie n = v1 - center;
     n = B->u * n;
     n.Normalize( );
     m->normal = n;
@@ -136,7 +136,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
       return;
 
     m->contact_count = 1;
-    vec2 n = v2 - center;
+    vec2_ie n = v2 - center;
     v2 = B->u * v2 + b->position;
     m->contacts[0] = v2;
     n = B->u * n;
@@ -147,7 +147,7 @@ void CircletoPolygon( Manifold *m, Body *a, Body *b )
   // Closest to face
   else
   {
-    vec2 n = B->m_normals[faceNormal];
+    vec2_ie n = B->m_normals[faceNormal];
     if(Dot( center - v1, n ) > A->radius)
       return;
 
@@ -172,19 +172,19 @@ float FindAxisLeastPenetration( uint32 *faceIndex, PolygonShape *A, PolygonShape
   for(uint32 i = 0; i < A->m_vertexCount; ++i)
   {
     // Retrieve a face normal from A
-    vec2 n = A->m_normals[i];
-    vec2 nw = A->u * n;
+    vec2_ie n = A->m_normals[i];
+    vec2_ie nw = A->u * n;
 
     // Transform face normal into B's model space
     Mat2 buT = B->u.Transpose( );
     n = buT * nw;
 
     // Retrieve support point from B along -n
-    vec2 s = B->GetSupport( -n );
+    vec2_ie s = B->GetSupport( -n );
 
     // Retrieve vertex on face from A, transform into
     // B's model space
-    vec2 v = A->m_vertices[i];
+    vec2_ie v = A->m_vertices[i];
     v = A->u * v + A->body->position;
     v -= B->body->position;
     v = buT * v;
@@ -204,9 +204,9 @@ float FindAxisLeastPenetration( uint32 *faceIndex, PolygonShape *A, PolygonShape
   return bestDistance;
 }
 
-void FindIncidentFace( vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, uint32 referenceIndex )
+void FindIncidentFace( vec2_ie *v, PolygonShape *RefPoly, PolygonShape *IncPoly, uint32 referenceIndex )
 {
-  vec2 referenceNormal = RefPoly->m_normals[referenceIndex];
+  vec2_ie referenceNormal = RefPoly->m_normals[referenceIndex];
 
   // Calculate normal in incident's frame of reference
   referenceNormal = RefPoly->u * referenceNormal; // To world space
@@ -231,10 +231,10 @@ void FindIncidentFace( vec2 *v, PolygonShape *RefPoly, PolygonShape *IncPoly, ui
   v[1] = IncPoly->u * IncPoly->m_vertices[incidentFace] + IncPoly->body->position;
 }
 
-int32 Clip( vec2 n, float c, vec2 *face )
+int32 Clip( vec2_ie n, float c, vec2_ie *face )
 {
   uint32 sp = 0;
-  vec2 out[2] = {
+  vec2_ie out[2] = {
     face[0],
     face[1]
   };
@@ -308,7 +308,7 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
   }
 
   // World space incident face
-  vec2 incidentFace[2];
+  vec2_ie incidentFace[2];
   FindIncidentFace( incidentFace, RefPoly, IncPoly, referenceIndex );
 
   //        y
@@ -325,20 +325,20 @@ void PolygontoPolygon( Manifold *m, Body *a, Body *b )
   //  n : incident normal
 
   // Setup reference face vertices
-  vec2 v1 = RefPoly->m_vertices[referenceIndex];
+  vec2_ie v1 = RefPoly->m_vertices[referenceIndex];
   referenceIndex = referenceIndex + 1 == RefPoly->m_vertexCount ? 0 : referenceIndex + 1;
-  vec2 v2 = RefPoly->m_vertices[referenceIndex];
+  vec2_ie v2 = RefPoly->m_vertices[referenceIndex];
 
   // Transform vertices to world space
   v1 = RefPoly->u * v1 + RefPoly->body->position;
   v2 = RefPoly->u * v2 + RefPoly->body->position;
 
   // Calculate reference face side normal in world space
-  vec2 sidePlaneNormal = (v2 - v1);
+  vec2_ie sidePlaneNormal = (v2 - v1);
   sidePlaneNormal.Normalize( );
 
   // Orthogonalize
-  vec2 refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
+  vec2_ie refFaceNormal( sidePlaneNormal.y, -sidePlaneNormal.x );
 
   // ax + by = c
   // c is distance from origin

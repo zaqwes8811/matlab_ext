@@ -36,10 +36,10 @@ void Manifold::Initialize( void )
   for(uint32 i = 0; i < contact_count; ++i)
   {
     // Calculate radii from COM to contact
-    vec2 ra = contacts[i] - A->position;
-    vec2 rb = contacts[i] - B->position;
+    vec2_ie ra = contacts[i] - A->position;
+    vec2_ie rb = contacts[i] - B->position;
 
-    vec2 rv = B->velocity + Cross( B->angularVelocity, rb ) -
+    vec2_ie rv = B->velocity + Cross( B->angularVelocity, rb ) -
               A->velocity - Cross( A->angularVelocity, ra );
 
 
@@ -63,11 +63,11 @@ void Manifold::ApplyImpulse( void )
   for(uint32 i = 0; i < contact_count; ++i)
   {
     // Calculate radii from COM to contact
-    vec2 ra = contacts[i] - A->position;
-    vec2 rb = contacts[i] - B->position;
+    vec2_ie ra = contacts[i] - A->position;
+    vec2_ie rb = contacts[i] - B->position;
 
     // Relative velocity
-    vec2 rv = B->velocity + Cross( B->angularVelocity, rb ) -
+    vec2_ie rv = B->velocity + Cross( B->angularVelocity, rb ) -
               A->velocity - Cross( A->angularVelocity, ra );
 
     // Relative velocity along the normal
@@ -87,7 +87,7 @@ void Manifold::ApplyImpulse( void )
     j /= (float)contact_count;
 
     // Apply impulse
-    vec2 impulse = normal * j;
+    vec2_ie impulse = normal * j;
     A->ApplyImpulse( -impulse, ra );
     B->ApplyImpulse(  impulse, rb );
 
@@ -95,7 +95,7 @@ void Manifold::ApplyImpulse( void )
     rv = B->velocity + Cross( B->angularVelocity, rb ) -
          A->velocity - Cross( A->angularVelocity, ra );
 
-    vec2 t = rv - (normal * Dot( rv, normal ));
+    vec2_ie t = rv - (normal * Dot( rv, normal ));
     t.Normalize( );
 
     // j tangent magnitude
@@ -108,7 +108,7 @@ void Manifold::ApplyImpulse( void )
       return;
 
     // Coulumb's law
-    vec2 tangentImpulse;
+    vec2_ie tangentImpulse;
     if(std::abs( jt ) < j * sf)
       tangentImpulse = t * jt;
     else
@@ -124,7 +124,7 @@ void Manifold::PositionalCorrection( void )
 {
   const float k_slop = 0.05f; // Penetration allowance
   const float percent = 0.4f; // Penetration percentage to correct
-  vec2 correction = (std::max( penetration - k_slop, 0.0f ) / (A->im + B->im)) * normal * percent;
+  vec2_ie correction = (std::max( penetration - k_slop, 0.0f ) / (A->im + B->im)) * normal * percent;
   A->position -= correction * A->im;
   B->position += correction * B->im;
 }

@@ -41,8 +41,8 @@ struct Manifold
   Body *B;
 
   float penetration;     // Depth of penetration from collision
-  vec2 normal;          // From A to B
-  vec2 contacts[2];     // Points of contact during collision
+  vec2_ie normal;          // From A to B
+  vec2_ie contacts[2];     // Points of contact during collision
   uint32 contact_count; // Number of contacts that occured during collision
   float e;               // Mixed restitution
   float df;              // Mixed dynamic friction

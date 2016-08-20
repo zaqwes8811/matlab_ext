@@ -63,4 +63,16 @@ struct Scene: public BaseScene
 	std::vector<Manifold> contacts;
 };
 
+class SceneNoGravity: public BaseScene
+{
+public:
+	SceneNoGravity( f32 dt, uint32 iterations ) :
+			BaseScene(dt, iterations)
+	{
+	}
+	virtual void Step( void )
+	{
+	}
+};
+
 #endif // SCENE_H
